@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import net.minecraftforge.common.MinecraftForge;
+
 public class ModuleManager {
 
   private final Map<String, Module> moduleMap;
@@ -23,6 +25,7 @@ public class ModuleManager {
     if (module == null)
       return;
     this.moduleMap.computeIfAbsent(module.getModuleId(), k -> {
+      MinecraftForge.EVENT_BUS.register(module);
       return module;
     });
     if (module instanceof IDrawable) {

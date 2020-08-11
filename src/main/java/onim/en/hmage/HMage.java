@@ -1,6 +1,7 @@
 package onim.en.hmage;
 
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -20,6 +21,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLConfig;
 import onim.en.hmage.module.IDrawable;
 import onim.en.hmage.module.ModuleManager;
+import onim.en.hmage.module.normal.FixedFOV;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(HMage.MOD_ID)
@@ -54,10 +56,17 @@ public class HMage {
       LOGGER.info("trying to create configuration file");
       Files.createFile(config);
     } catch (IOException e) {
-      e.printStackTrace();
+      if (e instanceof FileAlreadyExistsException) {
+        LOGGER.info(e.getMessage());
+      } else {
+        e.printStackTrace();
+      }
     }
 
     this.moduleManager = new ModuleManager();
+
+    this.moduleManager.register(new FixedFOV(this.moduleManager));
+
   }
 
   @SubscribeEvent
