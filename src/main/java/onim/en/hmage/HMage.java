@@ -21,6 +21,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLConfig;
 import onim.en.hmage.module.IDrawable;
 import onim.en.hmage.module.ModuleManager;
+import onim.en.hmage.module.normal.CustomGuiBackground;
 import onim.en.hmage.module.normal.FixedFOV;
 
 // The value here should match an entry in the META-INF/mods.toml file
@@ -66,7 +67,7 @@ public class HMage {
     this.moduleManager = new ModuleManager();
 
     this.moduleManager.register(new FixedFOV(this.moduleManager));
-
+    this.moduleManager.register(new CustomGuiBackground(this.moduleManager));
   }
 
   @SubscribeEvent
