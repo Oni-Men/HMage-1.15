@@ -15,7 +15,7 @@ import onim.en.hmage.module.ModuleManager;
 public class FixedFOV extends Module {
 
   public FixedFOV(ModuleManager manager) {
-    super("hmage-module-fixed-fov", manager);
+    super("hmage.module.fixed-fov", manager);
   }
 
   @SubscribeEvent

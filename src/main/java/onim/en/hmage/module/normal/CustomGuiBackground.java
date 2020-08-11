@@ -17,7 +17,7 @@ import onim.en.hmage.module.ModuleManager;
 public class CustomGuiBackground extends Module {
 
   public CustomGuiBackground(ModuleManager manager) {
-    super("hmage-module-custom-gui-bg", manager);
+    super("hmage.module.custom-gui-bg", manager);
   }
 
   @SubscribeEvent
