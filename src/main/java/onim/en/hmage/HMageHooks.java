@@ -10,7 +10,7 @@ import onim.en.hmage.event.PlayParticleEvent;
 
 public class HMageHooks {
 
-  public static boolean onDrawWorldBackground() {
+  public static boolean onRenderBackground() {
     return MinecraftForge.EVENT_BUS.post(new DrawWorldBackgroundEvent());
   }
 
