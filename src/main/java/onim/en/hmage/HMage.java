@@ -1,8 +1,5 @@
 package onim.en.hmage;
 
-import java.io.IOException;
-import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -21,6 +18,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLConfig;
 import onim.en.hmage.module.IDrawable;
 import onim.en.hmage.module.ModuleManager;
+import onim.en.hmage.module.drawable.StatusEffect;
 import onim.en.hmage.module.normal.CustomGuiBackground;
 import onim.en.hmage.module.normal.FixedFOV;
 
@@ -33,7 +31,7 @@ public class HMage {
   public static boolean enabled = true;
 
   // Directly reference a log4j logger.
-  private static final Logger LOGGER = LogManager.getLogger();
+  public static final Logger LOGGER = LogManager.getLogger();
   public static Path config;
 
   public ModuleManager moduleManager;
@@ -53,21 +51,15 @@ public class HMage {
 
   private void init() {
     config = Paths.get(FMLConfig.defaultConfigPath()).resolve("./hmage.properties");
-    try {
-      LOGGER.info("trying to create configuration file");
-      Files.createFile(config);
-    } catch (IOException e) {
-      if (e instanceof FileAlreadyExistsException) {
-        LOGGER.info(e.getMessage());
-      } else {
-        e.printStackTrace();
-      }
-    }
+
+    HMageSettings.init(config);
 
     this.moduleManager = new ModuleManager();
 
     this.moduleManager.register(new FixedFOV(this.moduleManager));
     this.moduleManager.register(new CustomGuiBackground(this.moduleManager));
+
+    this.moduleManager.register(new StatusEffect(this.moduleManager));
   }
 
   @SubscribeEvent
