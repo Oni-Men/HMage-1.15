@@ -29,6 +29,7 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.event.TickEvent.ClientTickEvent;
 import net.minecraftforge.event.TickEvent.Phase;
 import onim.en.hmage.HMage;
+import onim.en.hmage.HMageDiscordHandler;
 import onim.en.hmage.observer.data.AnniGameData;
 import onim.en.hmage.observer.data.AnniTeamColor;
 import onim.en.hmage.observer.data.GamePhase;
@@ -58,7 +59,7 @@ public class AnniObserver {
 
   public void onJoinGame() {
     this.tickLeftWhileNoAnniScoreboard = 0;
-    //HMageDiscordHandler.INSTANCE.updatePresenceWithGameInfo(gameInfo);
+    HMageDiscordHandler.INSTANCE.updatePresenceWithGameInfo(gameInfo);
   }
 
   public void onLeaveGame() {
@@ -81,11 +82,11 @@ public class AnniObserver {
       Arrays.stream(listFiles).sorted((f1, f2) -> f2.compareTo(f1)).skip(20).forEach(f -> f.delete());
 
     }
-    //HMageDiscordHandler.INSTANCE.clearPresence();
+    HMageDiscordHandler.INSTANCE.clearPresence();
   }
 
   public void updatePresence() {
-    //HMageDiscordHandler.INSTANCE.updatePresenceWithGameInfo(gameInfo);
+    HMageDiscordHandler.INSTANCE.updatePresenceWithGameInfo(gameInfo);
   }
 
   @OnlyIn(Dist.CLIENT)

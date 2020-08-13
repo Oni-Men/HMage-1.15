@@ -3,9 +3,6 @@ package onim.en.hmage;
 import club.minnced.discord.rpc.DiscordEventHandlers;
 import club.minnced.discord.rpc.DiscordRPC;
 import club.minnced.discord.rpc.DiscordRichPresence;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.client.multiplayer.ServerData;
 import onim.en.hmage.observer.data.AnniGameData;
 
 public class HMageDiscordHandler {
@@ -40,27 +37,4 @@ public class HMageDiscordHandler {
     client.Discord_UpdatePresence(presence);
   }
 
-  public void updatePresenceWithNormal() {
-    DiscordRichPresence presence = new DiscordRichPresence();
-
-    String state = "-";
-    String details = "-";
-
-    ServerData server = Minecraft.getInstance().getCurrentServerData();
-    if (server != null) {
-      details = server.serverIP.toLowerCase();
-    }
-
-    ClientPlayerEntity player = Minecraft.getInstance().player;
-
-    if (player != null) {
-      state = player.getName().getString();
-    }
-
-    presence.startTimestamp = HMage.startMilliTime / 1000;
-    presence.details = details;
-    presence.state = state;
-
-    client.Discord_UpdatePresence(presence);
-  }
 }
