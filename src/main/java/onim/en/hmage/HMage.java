@@ -7,7 +7,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screen.inventory.ChestScreen;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.container.ChestContainer;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
+import net.minecraftforge.client.event.GuiScreenEvent.InitGuiEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
 import net.minecraftforge.common.MinecraftForge;
@@ -16,6 +21,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLConfig;
+import onim.en.hmage.gui.AnniServersScreen;
 import onim.en.hmage.module.IDrawable;
 import onim.en.hmage.module.ModuleManager;
 import onim.en.hmage.module.drawable.StatusEffect;
@@ -24,14 +30,17 @@ import onim.en.hmage.module.normal.FixedFOV;
 import onim.en.hmage.observer.AnniChatReciveExecutor;
 import onim.en.hmage.observer.AnniObserver;
 import onim.en.hmage.observer.AnniObserverMap;
+import onim.en.hmage.util.GuiScreenUtils;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(HMage.MOD_ID)
 public class HMage {
 
   public final static String MOD_ID = "hmage";
+  public static final long startMilliTime = System.currentTimeMillis();
 
   private static HMage instance = null;
+
 
   // Directly reference a log4j logger.
   public static final Logger LOGGER = LogManager.getLogger();
@@ -85,6 +94,25 @@ public class HMage {
       for (IDrawable drawable : this.moduleManager.getEnabledDrawableModules()) {
         drawable.draw(mc, partialTicks);
       }
+    }
+  }
+
+  @SubscribeEvent
+  public void onInitGuiEvent(InitGuiEvent event) {
+    if (!(event.getGui() instanceof ChestScreen)) { return; }
+    ChestScreen gui = (ChestScreen) event.getGui();
+
+    if (gui instanceof AnniServersScreen) { return; }
+
+    IInventory chestInventory = GuiScreenUtils.getChestInventory(gui);
+
+    if (chestInventory == null) { return; }
+
+    ITextComponent chestDisplayName = gui.getTitle();
+    if (chestDisplayName.getFormattedText().startsWith(GuiScreenUtils.SELEC_SERVER)) {
+
+      Minecraft mc = Minecraft.getInstance();
+      mc.displayGuiScreen(new AnniServersScreen((ChestContainer) chestInventory, mc.player.inventory, gui.getTitle()));
     }
   }
 
