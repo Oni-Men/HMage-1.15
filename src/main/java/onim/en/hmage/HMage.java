@@ -21,6 +21,9 @@ import onim.en.hmage.module.ModuleManager;
 import onim.en.hmage.module.drawable.StatusEffect;
 import onim.en.hmage.module.normal.CustomGuiBackground;
 import onim.en.hmage.module.normal.FixedFOV;
+import onim.en.hmage.observer.AnniChatReciveExecutor;
+import onim.en.hmage.observer.AnniObserver;
+import onim.en.hmage.observer.AnniObserverMap;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(HMage.MOD_ID)
@@ -28,12 +31,13 @@ public class HMage {
 
   public final static String MOD_ID = "hmage";
 
-  public static boolean enabled = true;
+  private static HMage instance = null;
 
   // Directly reference a log4j logger.
   public static final Logger LOGGER = LogManager.getLogger();
   public static Path config;
 
+  public AnniObserverMap anniObserverMap;
   public ModuleManager moduleManager;
 
   public HMage() {
@@ -50,9 +54,13 @@ public class HMage {
   }
 
   private void init() {
+    instance = this;
+
     config = Paths.get(FMLConfig.defaultConfigPath()).resolve("./hmage.properties");
 
     HMageSettings.init(config);
+
+    this.anniObserverMap = AnniObserverMap.getInstance();
 
     this.moduleManager = new ModuleManager();
 
@@ -64,7 +72,7 @@ public class HMage {
 
   @SubscribeEvent
   public void onRenderGameOverlay(final RenderGameOverlayEvent event) {
-    if (!enabled)
+    if (!HMageSettings.enabled)
       return;
 
     Minecraft mc = Minecraft.getInstance();
@@ -82,6 +90,22 @@ public class HMage {
 
   @SubscribeEvent
   public void onReciveChat(ClientChatReceivedEvent event) {
+    if (HMageSettings.enabled) {
+      AnniChatReciveExecutor.onReceiveChat(event.getMessage(), event.getType());
+    }
+  }
 
+  @SubscribeEvent
+  public void onBossOverlayRender(RenderGameOverlayEvent.BossInfo event) {
+    if (HMageSettings.enabled) {
+      AnniObserver anniObserver = this.anniObserverMap.getAnniObserver();
+      if (anniObserver != null) {
+        anniObserver.onBossOverlayRender(event);
+      }
+    }
+  }
+
+  public static HMage getInstance() {
+    return instance;
   }
 }
