@@ -11,11 +11,12 @@ import net.minecraftforge.client.event.FOVUpdateEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import onim.en.hmage.module.Module;
 import onim.en.hmage.module.ModuleManager;
+import onim.en.hmage.module.Modules;
 
 public class FixedFOV extends Module {
 
   public FixedFOV(ModuleManager manager) {
-    super("hmage.module.fixed-fov", manager);
+    super(Modules.FIXED_FOV.getId(), manager);
   }
 
   @SubscribeEvent

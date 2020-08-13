@@ -13,11 +13,12 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import onim.en.hmage.event.DrawWorldBackgroundEvent;
 import onim.en.hmage.module.Module;
 import onim.en.hmage.module.ModuleManager;
+import onim.en.hmage.module.Modules;
 
 public class CustomGuiBackground extends Module {
 
   public CustomGuiBackground(ModuleManager manager) {
-    super("hmage.module.custom-gui-bg", manager);
+    super(Modules.CUSTOM_GUI_BG.getId(), manager);
   }
 
   @SubscribeEvent
