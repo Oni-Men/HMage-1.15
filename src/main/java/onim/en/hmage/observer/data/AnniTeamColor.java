@@ -34,6 +34,6 @@ public enum AnniTeamColor {
   }
 
   public String getColoredName() {
-    return (this == NO_JOIN ? "" : "\u00a7" + colorCode) + getColorName();
+    return (this == NO_JOIN ? "" : this.getColorCode()) + getColorName();
   }
 }

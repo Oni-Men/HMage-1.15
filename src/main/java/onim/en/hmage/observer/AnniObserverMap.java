@@ -46,11 +46,11 @@ public class AnniObserverMap {
       AnniObserver anniObserver = anniObserverMap.get(serverName);
       if (anniObserver != null) {
         if (anniObserver.getGameInfo().getGamePhase().getValue() > phase.getValue()) {
-          HMage.LOGGER.info("detect change game, before phase:" + anniObserver.getGameInfo().getGamePhase()
+          HMage.LOGGER.info("detected game was changed, before phase:" + anniObserver.getGameInfo().getGamePhase()
               + ", next phase:" + phase);
           canPutNewObserver = true;
         } else {
-          HMage.LOGGER.info("detect change game, before phase:" + anniObserver.getGameInfo().getGamePhase()
+          HMage.LOGGER.info("detect the game was changed, before phase:" + anniObserver.getGameInfo().getGamePhase()
               + ", next phase:" + phase);
         }
       }
@@ -59,16 +59,16 @@ public class AnniObserverMap {
     }
 
     if (force || canPutNewObserver) {
-      HMage.LOGGER.info("New Annihilation Observer created");
+      HMage.LOGGER.info("New observer was created.");
       anniObserverMap.put(serverName, new AnniObserver(Minecraft.getInstance()));
     }
 
     getAnniObserver().onJoinGame();
-    HMage.LOGGER.info("Playing server name: " + playingServerName);
+    HMage.LOGGER.info("Observe annihilation game: " + playingServerName);
   }
 
   public void unsetAnniObserver() {
-    HMage.LOGGER.info("Stop observing anni: " + playingServerName);
+    HMage.LOGGER.info("Stop observing game: " + playingServerName);
     getAnniObserver().onLeaveGame();
     this.playingServerName = null;
   }

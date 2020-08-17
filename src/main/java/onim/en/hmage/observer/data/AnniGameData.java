@@ -31,8 +31,8 @@ public class AnniGameData {
   private Map<String, AnniPlayerData> otherPlayerStatsMap = new HashMap<>();
 
   /** 自身のキル数 */
-  private AnniPlayerData mePlayerData = new AnniPlayerData(Minecraft.getInstance().player.getName().getString(),
-      AnniTeamColor.NO_JOIN);
+  private AnniPlayerData mePlayerData = new AnniPlayerData(
+      Minecraft.getInstance().player.getName().getString(), AnniTeamColor.NO_JOIN);
 
   /** Map名 */
   @Nullable

@@ -41,7 +41,7 @@ public class AnniObserver {
   private static final String VOTING_TEXT = ChatFormatting.GREEN + "/vote [map name] to vote";
 
   private Minecraft mc;
-  private Map<UUID, BossInfo> bossInfoMap = null;
+  public Map<UUID, BossInfo> bossInfoMap = null;
 
   private int tickLeftWhileNoAnniScoreboard = 0;
 
@@ -114,10 +114,11 @@ public class AnniObserver {
       AnniTeamColor previousTeamColor = gameInfo.getMeTeamColor();
       AnniTeamColor nextTeamColor = AnniTeamColor.NO_JOIN;
 
-      ScorePlayerTeam team = scoreboard.getPlayersTeam(gameInfo.getMePlayerData().getPlayerName());
+      ScorePlayerTeam team = scoreboard.getPlayersTeam(mc.player.getScoreboardName());
 
       if (team != null) {
-        nextTeamColor = AnniTeamColor.findByTeamName(team.getDisplayName().getString().replaceFirst("§.", ""));
+        nextTeamColor = AnniTeamColor
+            .findByTeamName(team.getDisplayName().getUnformattedComponentText());
       }
 
       if (previousTeamColor != nextTeamColor) {
@@ -137,16 +138,19 @@ public class AnniObserver {
     //フェーズを取得
     if (bossInfoMap != null) {
       for (BossInfo bossInfo : bossInfoMap.values()) {
-        //フェーズを表示するボスバーは青色なので
-        if (bossInfo.getColor() == Color.BLUE) {
-          String name = bossInfo.getName().getUnformattedComponentText();
+        //フェーズを表示するボスバーは青色、または開始前は緑
+        if (bossInfo.getColor() == Color.BLUE || bossInfo.getColor() == Color.GREEN) {
+          String name = bossInfo.getName().getString();
           nextPhase = GamePhase.getGamePhasebyText(name);
           break;
         }
       }
     }
+
+    //フェーズが変わったとき
     if (previousPhase == null || previousPhase.getValue() != nextPhase.getValue()) {
       this.gameInfo.setGamePhase(nextPhase);
+      //DiscordのRPCを更新
       updatePresence();
     }
 
@@ -168,7 +172,7 @@ public class AnniObserver {
 
     ITextComponent message = event.getMessage();
 
-    if (message.getUnformattedComponentText().isEmpty())
+    if (message.getString().isEmpty())
       return;
 
     //チャットを元に処理を実行
@@ -179,7 +183,7 @@ public class AnniObserver {
     ScoreObjective scoreobjective = scoreboard.getObjectiveInDisplaySlot(1);
 
     if (scoreobjective == null) { return false; }
-    String displayName = scoreobjective.getDisplayName().getString();
+    String displayName = scoreobjective.getDisplayName().getFormattedText();
 
     //Voteの場合
     if (displayName.contentEquals(VOTING_TEXT)) { return true; }
@@ -194,7 +198,7 @@ public class AnniObserver {
     ScoreObjective scoreobjective = scoreboard.getObjectiveInDisplaySlot(1);
 
     if (scoreobjective == null) { return null; }
-    String displayName = scoreobjective.getDisplayName().getString();
+    String displayName = scoreobjective.getDisplayName().getFormattedText();
 
     if (displayName.equals(VOTING_TEXT)) {
       gameInfo.setGamePhase(GamePhase.STARTING);
@@ -203,7 +207,7 @@ public class AnniObserver {
 
     if (!displayName.contains(MAP_PREFIX)) { return null; }
 
-    return displayName.replace(MAP_PREFIX, "");
+    return displayName.replace(MAP_PREFIX, "").replace("§r", "");
   }
 
   public void onBossOverlayRender(RenderGameOverlayEvent.BossInfo event) {
@@ -214,30 +218,4 @@ public class AnniObserver {
     this.bossInfoMap.put(bossInfo.getUniqueId(), bossInfo);
   }
 
-  //  @SuppressWarnings("unchecked")
-  //  private Map<UUID, BossInfo> getBossInfoMap(BossOverlayGui bossOverlay) {
-  //    if (bossOverlay != null) {
-  //
-  //      Field[] declaredFields = bossOverlay.getClass().getDeclaredFields();
-  //
-  //      for (Field field : declaredFields) {
-  //
-  //        int modifiers = field.getModifiers();
-  //
-  //        if (!Modifier.isPrivate(modifiers) || !Modifier.isFinal(modifiers))
-  //          continue;
-  //
-  //        if (!Map.class.isAssignableFrom(field.getType()))
-  //          continue;
-  //
-  //        try {
-  //          field.setAccessible(true);
-  //          return (Map<UUID, BossInfo>) field.get(bossOverlay);
-  //        } catch (IllegalArgumentException | IllegalAccessException e) {
-  //          e.printStackTrace();
-  //        }
-  //      }
-  //    }
-  //    return null;
-  //  }
 }

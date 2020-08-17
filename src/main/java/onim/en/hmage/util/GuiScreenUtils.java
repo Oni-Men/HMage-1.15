@@ -11,39 +11,37 @@ import com.mojang.realmsclient.gui.ChatFormatting;
 
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.screen.inventory.ChestScreen;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.container.ChestContainer;
+import net.minecraftforge.coremod.api.ASMAPI;
 import onim.en.hmage.observer.data.AnniPlayerData;
 
 public class GuiScreenUtils {
 
   private static final String GRAY = ChatFormatting.GRAY.toString();
   private static final String BLACK = ChatFormatting.BLACK.toString();
-  public static final String SELEC_SERVER = MessageFormat.format("{0}|{1}Select Server{0}", GRAY, BLACK);
+  public static final String SELECT_SERVER = MessageFormat.format("{0}|{1}Select Server{0}|", GRAY, BLACK);
 
-  public static IInventory getChestInventory(ChestScreen chest) {
+  public static ChestContainer getChestInventory(ChestScreen chest) {
 
-    for (Field field : chest.getClass().getDeclaredFields()) {
+    String mapField = ASMAPI.mapField("field_147002_h");
+
+    for (Field field : chest.getClass().getSuperclass().getDeclaredFields()) {
       try {
 
         int mod = field.getModifiers();
 
-        if (!Modifier.isPrivate(mod) || !Modifier.isFinal(mod)) {
+        if (!Modifier.isProtected(mod) || !Modifier.isFinal(mod)) {
           continue;
         }
 
-        if (!IInventory.class.isAssignableFrom(field.getType())) {
+        if (!field.getName().equals(mapField)) {
           continue;
         }
 
         field.setAccessible(true);
-        IInventory inv = (IInventory) field.get(chest);
+        ChestContainer chestContainer = (ChestContainer) field.get(chest);
 
-        if (inv instanceof PlayerInventory) {
-          continue;
-        }
-
-        return inv;
+        return chestContainer;
       } catch (IllegalArgumentException | IllegalAccessException e) {
         e.printStackTrace();
       }

@@ -47,7 +47,7 @@ public class AnniChatReciveExecutor {
    * @param textComponent チャット
    */
   public static void onReceiveChat(ITextComponent textComponent, ChatType type) {
-    blockingQueue.add(new ChatReciveTask(textComponent.getUnformattedComponentText(), type));
+    blockingQueue.add(new ChatReciveTask(textComponent.getFormattedText(), type));
   }
 
   public synchronized static void startThread() {
