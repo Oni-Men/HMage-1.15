@@ -77,7 +77,7 @@ public class StatusEffect extends DrawableModule {
     if (this.potionEffectList == null || this.getLayout().isHorizontal()) { return 20; }
     if (heightHashCode != potionEffectList.hashCode()) {
       cachedHeight = potionEffectList.stream()
-          .filter(p -> p.getEffectInstance().isShowIcon() && p.doesShowParticles())
+          .filter(p -> p.getEffectInstance().isShowIcon())
           .collect(Collectors.toList())
           .size() * (20);
       heightHashCode = potionEffectList.hashCode();
@@ -105,7 +105,7 @@ public class StatusEffect extends DrawableModule {
     PotionSpriteUploader potionspriteuploader = mc.getPotionSpriteUploader();
 
     for (EffectInstance effectinstance : potionEffectList) {
-      if (!effectinstance.isShowIcon() || !effectinstance.doesShowParticles())
+      if (!effectinstance.isShowIcon())
         continue;
 
       Effect effect = effectinstance.getPotion();
