@@ -19,13 +19,13 @@ public class AnniChatReciveExecutor {
 
   /** キルログのパターン */
   private static Pattern killChatPattern = Pattern
-      .compile("§(.)(.+)§(.)\\((.+)\\) (shot|killed) §(.)(.+)§(.)\\((.+)\\).*");
+      .compile("§(.)(.+)§(.)\\((.+)\\)§7 (shot|killed) §(.)(.+)§(.)\\((.+)\\)§r.*");
 
   /** ネクサスダメージのパターン */
   private static Pattern nexusChatPattern = Pattern
-      .compile("§(?<attackColor>.)(?<attacker>.+)§(.) has damaged the §(?<damageColor>.)(.+) team's nexus!.*");
+      .compile("§(?<attackColor>.)(?<attacker>.+)§7 has damaged the §(?<damageColor>.)(.+) team's nexus!.*");
   private static Pattern nexusChatPattern2 = Pattern
-      .compile("§(?<damageColor>.)(.+) team's§(.) nexus is under attack by §(?<attackColor>.)(?<attacker>.+).*");
+      .compile("§(?<damageColor>.)(.+) team's§7 nexus is under attack by §(?<attackColor>.)(?<attacker>.+).*");
 
   /** 拠点落ちた時のパターン */
   private static String AA = "(§.▒§r){10} §r";
@@ -79,10 +79,13 @@ public class AnniChatReciveExecutor {
           }
           String message = task.getMessage();
 
-          AnniObserver anniObserver = AnniObserverMap.getInstance().getAnniObserver();
-          if (anniObserver == null) { return; }
+          AnniObserver anniObserver = HMage.getInstance().anniObserverMap.getAnniObserver();
+          if (anniObserver == null) {
+            continue;
+          }
 
           if (task.getChatType() == ChatType.CHAT) {
+
             //パターンにマッチすることを確認
             Matcher matcher = killChatPattern.matcher(message);
             if (matcher.matches()) {

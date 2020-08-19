@@ -39,7 +39,6 @@ public class AnniObserverMap {
 
   public void setAnniObserver(String serverName, GamePhase phase, boolean force) {
     playingServerName = serverName;
-
     boolean canPutNewObserver = false;
 
     if (anniObserverMap.containsKey(serverName)) {
@@ -59,18 +58,21 @@ public class AnniObserverMap {
     }
 
     if (force || canPutNewObserver) {
-      HMage.LOGGER.info("New observer was created.");
+      HMage.LOGGER.info(String.format("Observer Created: %s", playingServerName));
+      this.unsetAnniObserver();
       anniObserverMap.put(serverName, new AnniObserver(Minecraft.getInstance()));
     }
 
     getAnniObserver().onJoinGame();
-    HMage.LOGGER.info("Observe annihilation game: " + playingServerName);
+    HMage.LOGGER.info(String.format("Observer Started: %s", playingServerName));
   }
 
   public void unsetAnniObserver() {
-    HMage.LOGGER.info("Stop observing game: " + playingServerName);
-    getAnniObserver().onLeaveGame();
-    this.playingServerName = null;
+    if (getAnniObserver() != null) {
+      HMage.LOGGER.info(String.format("Observer Stopped: %s", playingServerName));
+      getAnniObserver().onLeaveGame();
+      this.playingServerName = null;
+    }
   }
 
   @Nullable
