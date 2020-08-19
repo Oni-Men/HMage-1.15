@@ -10,18 +10,18 @@ import java.util.function.Function;
 import com.mojang.realmsclient.gui.ChatFormatting;
 
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.screen.inventory.ChestScreen;
-import net.minecraft.inventory.container.ChestContainer;
+import net.minecraft.client.gui.screen.inventory.ContainerScreen;
+import net.minecraft.inventory.container.Container;
 import net.minecraftforge.coremod.api.ASMAPI;
 import onim.en.hmage.observer.data.AnniPlayerData;
 
-public class GuiScreenUtils {
+public class ScreenUtils {
 
   private static final String GRAY = ChatFormatting.GRAY.toString();
   private static final String BLACK = ChatFormatting.BLACK.toString();
   public static final String SELECT_SERVER = MessageFormat.format("{0}|{1}Select Server{0}|", GRAY, BLACK);
 
-  public static ChestContainer getChestInventory(ChestScreen chest) {
+  public static <T extends Container> Container getContainer(ContainerScreen<T> chest) {
 
     String mapField = ASMAPI.mapField("field_147002_h");
 
@@ -39,9 +39,9 @@ public class GuiScreenUtils {
         }
 
         field.setAccessible(true);
-        ChestContainer chestContainer = (ChestContainer) field.get(chest);
+        Container container = (Container) field.get(chest);
 
-        return chestContainer;
+        return container;
       } catch (IllegalArgumentException | IllegalAccessException e) {
         e.printStackTrace();
       }
