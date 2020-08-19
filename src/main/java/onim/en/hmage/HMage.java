@@ -16,10 +16,12 @@ import net.minecraft.client.gui.screen.inventory.ChestScreen;
 import net.minecraft.inventory.container.ChestContainer;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.Scoreboard;
+import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.client.event.GuiScreenEvent.InitGuiEvent;
+import net.minecraftforge.client.event.InputEvent.KeyInputEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
 import net.minecraftforge.common.MinecraftForge;
@@ -27,21 +29,23 @@ import net.minecraftforge.event.TickEvent.ClientTickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.loading.FMLConfig;
-import onim.en.hmage.command.HMageDebug;
-import onim.en.hmage.gui.AnniServersScreen;
+import onim.en.hmage.gui.screen.AnniServersScreen;
+import onim.en.hmage.gui.screen.HMageSettingScreen;
 import onim.en.hmage.module.IDrawable;
 import onim.en.hmage.module.ModuleManager;
+import onim.en.hmage.module.drawable.EquipmentInfo;
 import onim.en.hmage.module.drawable.StatusEffect;
+import onim.en.hmage.module.drawable.label.CpsCounter;
 import onim.en.hmage.module.normal.CustomGuiBackground;
 import onim.en.hmage.module.normal.FixedFOV;
+import onim.en.hmage.module.normal.RecipeBookRemover;
 import onim.en.hmage.observer.AnniChatReciveExecutor;
 import onim.en.hmage.observer.AnniObserver;
 import onim.en.hmage.observer.AnniObserverMap;
 import onim.en.hmage.observer.data.AnniGameData;
 import onim.en.hmage.observer.data.AnniPlayerData;
-import onim.en.hmage.util.GuiScreenUtils;
+import onim.en.hmage.util.ScreenUtils;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(HMage.MOD_ID)
@@ -58,6 +62,8 @@ public class HMage {
 
   public AnniObserverMap anniObserverMap;
   public ModuleManager moduleManager;
+
+  private ITextComponent latestChat = null;
 
   public HMage() {
     //FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
@@ -82,26 +88,37 @@ public class HMage {
 
     this.moduleManager.register(new FixedFOV(this.moduleManager));
     this.moduleManager.register(new CustomGuiBackground(this.moduleManager));
+    this.moduleManager.register(new RecipeBookRemover(this.moduleManager));
+
     this.moduleManager.register(new StatusEffect(this.moduleManager));
+    this.moduleManager.register(new EquipmentInfo(this.moduleManager));
+
+    this.moduleManager.register(new CpsCounter(this.moduleManager));
+
+    HMageSettings.load();
 
     //HMageが使用するキーバインドをMinecraftに登録
     ClientRegistry.registerKeyBinding(HMageSettings.openSettingsKey);
     ClientRegistry.registerKeyBinding(HMageSettings.showAnniRankingTab);
-
 
     //Anniのチャットを処理するスレッドを開始
     AnniChatReciveExecutor.startThread();
   }
 
   @SubscribeEvent
-  public void onGameStart(FMLServerStartingEvent event) {
-    HMageDebug.register(event.getCommandDispatcher());
+  public void onInputUpdate(KeyInputEvent event) {
+    Minecraft mc = Minecraft.getInstance();
+
+    if (HMageSettings.openSettingsKey.isPressed()) {
+      if (mc.currentScreen == null) {
+        mc.enqueue(() -> mc.displayGuiScreen(new HMageSettingScreen()));
+      }
+    }
+
   }
 
   @SubscribeEvent
   public void onRenderGameOverlay(final RenderGameOverlayEvent event) {
-
-
     if (!HMageSettings.enabled)
       return;
 
@@ -111,7 +128,7 @@ public class HMage {
       return;
 
     if (event.getType() == ElementType.TEXT) {
-      //this.renderHMageDebugInfo();
+      this.renderHMageDebugInfo();
 
       if (HMageSettings.showAnniRankingTab.isKeyDown()) {
         renderAnniRanking(event.getWindow().getScaledWidth(), event.getWindow().getScaledHeight());
@@ -132,12 +149,12 @@ public class HMage {
 
     if (gui instanceof AnniServersScreen) { return; }
 
-    ChestContainer chestInventory = GuiScreenUtils.getChestInventory(gui);
+    ChestContainer chestInventory = (ChestContainer) ScreenUtils.getContainer(gui);
 
     if (chestInventory == null) { return; }
 
     ITextComponent chestDisplayName = gui.getTitle();
-    if (chestDisplayName.getFormattedText().startsWith(GuiScreenUtils.SELECT_SERVER)) {
+    if (chestDisplayName.getFormattedText().startsWith(ScreenUtils.SELECT_SERVER)) {
 
       StringTextComponent title = new StringTextComponent(ChatFormatting.BLUE + "|Server Selector|");
 
@@ -161,6 +178,9 @@ public class HMage {
   public void onReciveChat(ClientChatReceivedEvent event) {
     if (HMageSettings.enabled) {
       AnniChatReciveExecutor.onReceiveChat(event.getMessage(), event.getType());
+    }
+    if (event.getType() == ChatType.GAME_INFO) {
+      this.latestChat = event.getMessage();
     }
   }
 
@@ -189,10 +209,10 @@ public class HMage {
 
     RenderSystem.disableLighting();
 
-    GuiScreenUtils.drawRankingLeft("Kills in this Game", killRanking, mc.fontRenderer, 4, 4,
+    ScreenUtils.drawRankingLeft("Kills in this Game", killRanking, mc.fontRenderer, 4, 4,
         d -> String.format("%dK", d.getTotalKillCount()));
 
-    GuiScreenUtils.drawRankingRight("Nexus damage in this Game", nexusRanking, mc.fontRenderer, 4, width - 4,
+    ScreenUtils.drawRankingRight("Nexus damage in this Game", nexusRanking, mc.fontRenderer, 4, width - 4,
         d -> String.format("%dD", d.getNexusDamageCount()));
   }
 
@@ -210,7 +230,8 @@ public class HMage {
       Scoreboard scoreboard = mc.world.getScoreboard();
 
       if (scoreboard != null) {
-        List<String> list = scoreboard.getTeams().stream().map(t -> t.getDisplayName().getFormattedText()).collect(Collectors.toList());
+        List<String> list = scoreboard.getTeams().stream().map(t -> t.getDisplayName().getFormattedText())
+            .collect(Collectors.toList());
         mc.fontRenderer.drawString(String.join(",", list), 4, 12,
             0xffffff);
 
@@ -220,6 +241,11 @@ public class HMage {
               0xffffff);
         }
       }
+    }
+
+    if (this.latestChat != null) {
+      String text = this.latestChat.getFormattedText();
+      mc.fontRenderer.drawString(text.replace('\u00a7', '%'), 4, 32, 0xffffff);
     }
   }
 

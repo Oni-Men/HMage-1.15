@@ -6,5 +6,7 @@ public interface IDrawable {
 
   public void draw(Minecraft mc, float partialTicks);
 
+  public void draw(Minecraft mc, float partialTicks, boolean layoutMode);
+
   public boolean canDraw();
 }

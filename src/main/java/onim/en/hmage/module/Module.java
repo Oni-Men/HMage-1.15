@@ -1,5 +1,7 @@
 package onim.en.hmage.module;
 
+import onim.en.hmage.HMageSettings;
+
 public abstract class Module {
 
   private final String moduleId;
@@ -24,4 +26,11 @@ public abstract class Module {
     return this.enabled;
   }
 
+  public void load() {
+    this.setEnabled(HMageSettings.getBoolean(this.getModuleId() + ".enabled", enabled));
+  }
+
+  public void store() {
+    HMageSettings.setBoolean(this.getModuleId() + ".enabled", enabled);
+  }
 }

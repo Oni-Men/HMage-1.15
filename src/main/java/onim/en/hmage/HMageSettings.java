@@ -46,20 +46,44 @@ public class HMageSettings {
     }
   }
 
-  public static void save() {
+  public static void load() {
+    if (config == null)
+      return;
+
+    enabled = getBoolean("enabled", enabled);
+
+    if (HMage.getInstance().moduleManager == null) {
+      HMage.LOGGER.info("Module Manager is NULL");
+    } else {
+      HMage.getInstance().moduleManager.loadAllSettings();
+    }
+  }
+
+  public static void store() {
     if (config == null)
       return;
 
     setBoolean("enabled", enabled);
 
+    if (HMage.getInstance().moduleManager == null) {
+      HMage.LOGGER.info("Module Manager is NULL");
+    } else {
+      HMage.getInstance().moduleManager.storeAllSettings();
+    }
+
     new Thread(() -> {
       try {
-        properties.store(Files.newBufferedWriter(config, StandardCharsets.UTF_8), "Created by HMage");
+        properties.store(Files.newBufferedWriter(config, StandardCharsets.UTF_8), "Created by HMage-MC1.15");
       } catch (IOException e) {
         e.printStackTrace();
       }
     }).start();
 
+  }
+
+  public static void toggleEnabled() {
+    enabled = !enabled;
+    setBoolean("enabled", enabled);
   }
 
   public static void enable() {

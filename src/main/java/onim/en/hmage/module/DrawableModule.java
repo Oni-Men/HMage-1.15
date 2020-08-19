@@ -6,20 +6,27 @@ import onim.en.hmage.util.Layout;
 
 public abstract class DrawableModule extends Module implements IDrawable {
 
-  private int x, y, width, height;
-  private Layout layout = null;
+  protected int x, y, width, height;
+  protected float scale = 1f;
+  protected Layout layout = null;
+
+  protected int computedX, computedY, computedWidth, computedHeight;
 
   public DrawableModule(String moduleId, ModuleManager manager) {
     super(moduleId, manager);
-    this.x = 0;
-    this.y = 0;
-    this.width = this.computeWidth();
-    this.height = this.computeHeight();
+    this.x = this.getDefaultX();
+    this.y = this.getDefaultY();
+    this.layout = this.getDefaultLayout();
   }
 
   @Override
   public boolean canDraw() {
     return this.isEnabled();
+  }
+
+  @Override
+  public void draw(Minecraft mc, float partialTicks) {
+    this.draw(mc, partialTicks, false);
   }
 
   public abstract Layout getDefaultLayout();
@@ -41,34 +48,55 @@ public abstract class DrawableModule extends Module implements IDrawable {
   }
 
   public int computeX(Minecraft mc) {
-    int x = this.x;
     Layout layout = this.getLayout();
+    this.computedX = this.x;
+    int computedWidth = this.computeWidth();
     switch (layout.getLayoutX()) {
     case CENTERX:
-      x += mc.getMainWindow().getScaledWidth() / 2;
+      this.computedX += (mc.getMainWindow().getScaledWidth() - computedWidth) / 2;
       break;
     case RIGHT:
-      x += mc.getMainWindow().getScaledWidth();
+      this.computedX += mc.getMainWindow().getScaledWidth() - computedWidth;
       break;
     default:
       break;
     }
-    return x;
+    return this.computedX;
   }
 
   public int computeY(Minecraft mc) {
-    int y = this.y;
+    this.computedY = this.y;
     Layout layout = this.getLayout();
+    int computedHeight = this.computeHeight();
     switch (layout.getLayoutY()) {
     case CENTERY:
-      y += mc.getMainWindow().getScaledHeight() / 2;
+      this.computedY += (mc.getMainWindow().getScaledHeight() - computedHeight) / 2;
       break;
     case BOTTOM:
-      y += mc.getMainWindow().getScaledHeight();
+      this.computedY += mc.getMainWindow().getScaledHeight() - computedHeight;
       break;
     default:
       break;
     }
-    return y;
+    return this.computedY;
   }
+
+  @Override
+  public void load() {
+    super.load();
+
+    this.x = HMageSettings.getInt(this.getModuleId() + ".x", x);
+    this.y = HMageSettings.getInt(this.getModuleId() + ".y", y);
+    this.scale = HMageSettings.getFloat(this.getModuleId() + ".scale", scale);
+  }
+
+  @Override
+  public void store() {
+    super.store();
+
+    HMageSettings.setInt(this.getModuleId() + ".x", x);
+    HMageSettings.setInt(this.getModuleId() + ".y", y);
+    HMageSettings.setFloat(this.getModuleId() + ".scale", scale);
+  }
+
 }

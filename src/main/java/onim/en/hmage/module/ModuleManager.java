@@ -36,6 +36,14 @@ public class ModuleManager {
     this.updateModules();
   }
 
+  public void loadAllSettings() {
+    this.moduleMap.values().forEach(m -> m.load());
+  }
+
+  public void storeAllSettings() {
+    this.moduleMap.values().forEach(m -> m.store());
+  }
+
   public Collection<Module> getEnabledModules() {
     return this.enabledModules;
   }

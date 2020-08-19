@@ -86,7 +86,7 @@ public class StatusEffect extends DrawableModule {
   }
 
   @Override
-  public void draw(Minecraft mc, float partialTicks) {
+  public void draw(Minecraft mc, float partialTicks, boolean layoutMode) {
     FontRenderer fontRenderer = mc.fontRenderer;
     PlayerEntity player = mc.player;
 
@@ -122,10 +122,10 @@ public class StatusEffect extends DrawableModule {
 
       if (position.isRight() && !position.isHorizontal()) {
         StatusEffect.innerBlit(x - textWidth, y, 18, 18, 0, textureatlassprite);
-        fontRenderer.drawString(text, x - textWidth - 20, y + 10 - fontRenderer.FONT_HEIGHT / 2, 0xffffff);
+        fontRenderer.drawStringWithShadow(text, x - textWidth - 20, y + 10 - fontRenderer.FONT_HEIGHT / 2, 0xffffff);
       } else {
         StatusEffect.innerBlit(x, y, 18, 18, 0, textureatlassprite);
-        fontRenderer.drawString(text, x + 20, y + 10 - fontRenderer.FONT_HEIGHT / 2, 0xffffff);
+        fontRenderer.drawStringWithShadow(text, x + 20, y + 10 - fontRenderer.FONT_HEIGHT / 2, 0xffffff);
       }
 
       if (position.isHorizontal()) {
