@@ -1,4 +1,4 @@
-package onim.en.hmage.gui;
+package onim.en.hmage.gui.screen;
 
 import java.util.List;
 
