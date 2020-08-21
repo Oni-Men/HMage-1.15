@@ -1,7 +1,7 @@
 package onim.en.hmage.module.drawable;
 
+import java.awt.Dimension;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
@@ -31,7 +31,7 @@ public class StatusEffect extends DrawableModule {
 
   private List<EffectInstance> potionEffectList = Lists.newArrayList();
 
-  private int widthHashCode = 0, cachedWidth = 0, heightHashCode = 0, cachedHeight = 0;
+  private int cacheId;
 
   public StatusEffect(ModuleManager manager) {
     super(Modules.STATUS_EFFECT.getId(), manager);
@@ -53,36 +53,47 @@ public class StatusEffect extends DrawableModule {
   }
 
   @Override
-  public int computeWidth() {
-    if (potionEffectList == null) { return 0; }
-    if (widthHashCode != potionEffectList.hashCode()) {
-      int width = 0;
-      for (EffectInstance effectinstance : potionEffectList) {
-        int durationStringWidth = Minecraft.getInstance().fontRenderer
-            .getStringWidth(EffectUtils.getPotionDurationString(effectinstance, 1F));
-        if (this.getLayout().isHorizontal()) {
-          width += 20 + durationStringWidth;
+  public void computeSize() {
+    if (computedSize == null) {
+      computedSize = new Dimension(0, 0);
+    }
+
+    //リストがnullのときはサイズ(0,0)
+    if (potionEffectList == null) {
+      computedSize.setSize(0, 0);
+      return;
+    }
+
+    //リストが空のときはサイズ(0,0)
+    if (potionEffectList.isEmpty()) {
+      computedSize.setSize(0, 0);
+      return;
+    }
+
+    Minecraft mc = Minecraft.getInstance();
+
+    //キャッシュが存在しないか古い場合、計算する
+    if (computedSize == null || cacheId != potionEffectList.hashCode()) {
+      int width = 0, height = 0;
+      for (EffectInstance effect : potionEffectList) {
+        String durationText = EffectUtils.getPotionDurationString(effect, 1f);
+        int durationTextWidth = mc.fontRenderer.getStringWidth(durationText);
+
+        if (!effect.isShowIcon()) {
+          continue;
+        }
+
+        if (this.layout.isHorizontal()) {
+          width += 20 + durationTextWidth;
+          height = 20;
         } else {
-          width = Math.max(width, 20 + durationStringWidth);
+          width = Math.max(width, 20 + durationTextWidth);
+          height += 20;
         }
       }
-      cachedWidth = width;
-      widthHashCode = potionEffectList.hashCode();
+      cacheId = potionEffectList.size();
+      computedSize.setSize(width, height);
     }
-    return this.cachedWidth;
-  }
-
-  @Override
-  public int computeHeight() {
-    if (this.potionEffectList == null || this.getLayout().isHorizontal()) { return 20; }
-    if (heightHashCode != potionEffectList.hashCode()) {
-      cachedHeight = potionEffectList.stream()
-          .filter(p -> p.getEffectInstance().isShowIcon())
-          .collect(Collectors.toList())
-          .size() * (20);
-      heightHashCode = potionEffectList.hashCode();
-    }
-    return cachedHeight;
   }
 
   @Override
@@ -99,8 +110,9 @@ public class StatusEffect extends DrawableModule {
     RenderSystem.pushMatrix();
 
     Layout position = this.getLayout();
-    int x = this.computeX(mc);
-    int y = this.computeY(mc);
+    this.computePosition(mc);
+    int x = this.computedPoint.x;
+    int y = this.computedPoint.y;
 
     PotionSpriteUploader potionspriteuploader = mc.getPotionSpriteUploader();
 
@@ -122,7 +134,7 @@ public class StatusEffect extends DrawableModule {
 
       if (position.isRight() && !position.isHorizontal()) {
         StatusEffect.innerBlit(x - textWidth, y, 18, 18, 0, textureatlassprite);
-        fontRenderer.drawStringWithShadow(text, x - textWidth - 20, y + 10 - fontRenderer.FONT_HEIGHT / 2, 0xffffff);
+        fontRenderer.drawStringWithShadow(text, x, y + 10 - fontRenderer.FONT_HEIGHT / 2, 0xffffff);
       } else {
         StatusEffect.innerBlit(x, y, 18, 18, 0, textureatlassprite);
         fontRenderer.drawStringWithShadow(text, x + 20, y + 10 - fontRenderer.FONT_HEIGHT / 2, 0xffffff);
@@ -156,4 +168,5 @@ public class StatusEffect extends DrawableModule {
     RenderSystem.enableAlphaTest();
     WorldVertexBufferUploader.draw(bufferbuilder);
  }
+
 }

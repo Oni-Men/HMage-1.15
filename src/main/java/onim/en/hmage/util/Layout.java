@@ -1,27 +1,45 @@
 package onim.en.hmage.util;
 
 public class Layout {
-  public enum LayoutType {
-    LEFT(0),
-    RIGHT(1),
+  public enum LayoutVertival {
     TOP(0),
-    BOTTOM(1),
-    CENTERX(2),
-    CENTERY(2),
-    VERTICAL(0),
-    HORIZONTAL(1);
+    CENTER(2),
+    BOTTOM(1);
 
-    public final int flg;
+    public final int f;
 
-    private LayoutType(int flg) {
-      this.flg = flg;
+    private LayoutVertival(int f) {
+      this.f = f;
     }
 
   }
 
-  private LayoutType xAxisLayout;
-  private LayoutType yAxisLayout;
-  private LayoutType direction;
+  public enum LayoutHorizontal {
+    LEFT(0),
+    CENTER(2),
+    RIGHT(1);
+
+    public final int f;
+
+    private LayoutHorizontal(int f) {
+      this.f = f;
+    }
+  }
+
+  public enum LayoutDirection {
+    VERTICAL(0),
+    HORIZONTAL(1);
+
+    public final int f;
+
+    private LayoutDirection(int f) {
+      this.f = f;
+    }
+  }
+
+  private LayoutHorizontal layoutHorizontal;
+  private LayoutVertival layoutVertical;
+  private LayoutDirection layoutDirection;
 
   public static Layout getLayout() {
     return getLayout(0);
@@ -57,87 +75,87 @@ public class Layout {
   }
 
   public int getCode() {
-    return xAxisLayout.flg | yAxisLayout.flg << 3 | direction.flg << 6;
+    return layoutHorizontal.f | layoutVertical.f << 3 | layoutDirection.f << 6;
   }
 
   public Layout left() {
-    this.xAxisLayout = LayoutType.LEFT;
+    this.layoutHorizontal = LayoutHorizontal.LEFT;
     return this;
   }
 
   public Layout right() {
-    this.xAxisLayout = LayoutType.RIGHT;
+    this.layoutHorizontal = LayoutHorizontal.RIGHT;
     return this;
   }
 
   public Layout top() {
-    this.yAxisLayout = LayoutType.TOP;
+    this.layoutVertical = LayoutVertival.TOP;
     return this;
   }
 
   public Layout bottom() {
-    this.yAxisLayout = LayoutType.BOTTOM;
+    this.layoutVertical = LayoutVertival.BOTTOM;
     return this;
   }
 
   public Layout centerx() {
-    this.xAxisLayout = LayoutType.CENTERX;
+    this.layoutHorizontal = LayoutHorizontal.CENTER;
     return this;
   }
 
   public Layout centery() {
-    this.yAxisLayout = LayoutType.CENTERY;
+    this.layoutVertical = LayoutVertival.CENTER;
     return this;
   }
 
   public Layout vertical() {
-    this.direction = LayoutType.VERTICAL;
+    this.layoutDirection = LayoutDirection.VERTICAL;
     return this;
   }
 
   public Layout horizontal() {
-    this.direction = LayoutType.HORIZONTAL;
+    this.layoutDirection = LayoutDirection.HORIZONTAL;
     return this;
   }
 
   public Layout toggleDirection() {
     if (isHorizontal()) {
-      this.direction = LayoutType.VERTICAL;
+      this.layoutDirection = LayoutDirection.VERTICAL;
     } else {
-      this.direction = LayoutType.HORIZONTAL;
+      this.layoutDirection = LayoutDirection.HORIZONTAL;
     }
     return this;
   }
 
-  public LayoutType getLayoutX() {
-    return this.xAxisLayout;
+  public LayoutHorizontal getLayoutX() {
+    return this.layoutHorizontal;
   }
 
-  public LayoutType getLayoutY() {
-    return this.yAxisLayout;
+  public LayoutVertival getLayoutY() {
+    return this.layoutVertical;
   }
 
-  public LayoutType getDirection() {
-    return this.direction;
+  public LayoutDirection getDirection() {
+    return this.layoutDirection;
   }
 
   public boolean isRight() {
-    return this.xAxisLayout == LayoutType.RIGHT;
+    return this.layoutHorizontal == LayoutHorizontal.RIGHT;
   }
 
   public boolean isCenterX() {
-    return this.xAxisLayout == LayoutType.CENTERX;
+    return this.layoutHorizontal == LayoutHorizontal.CENTER;
   }
 
   public boolean isBottom() {
-    return this.yAxisLayout == LayoutType.BOTTOM;
+    return this.layoutVertical == LayoutVertival.BOTTOM;
   }
 
   public boolean isCenterY() {
-    return this.yAxisLayout == LayoutType.CENTERY;
+    return this.layoutVertical == LayoutVertival.CENTER;
   }
 
   public boolean isHorizontal() {
-    return this.direction == LayoutType.HORIZONTAL;
+    return this.layoutDirection == LayoutDirection.HORIZONTAL;
   }
 }

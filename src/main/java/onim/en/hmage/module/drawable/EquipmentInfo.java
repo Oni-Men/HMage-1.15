@@ -1,40 +1,76 @@
 package onim.en.hmage.module.drawable;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.awt.Dimension;
+import java.util.HashMap;
+import java.util.Map;
 
-import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Hand;
 import onim.en.hmage.module.DrawableModule;
 import onim.en.hmage.module.ModuleManager;
 import onim.en.hmage.util.Layout;
 
 public class EquipmentInfo extends DrawableModule {
 
-  private static final List<ItemStack> armorListForLayoutMode = new ArrayList<>();
+  private final static Map<EquipmentSlotType, ItemStack> mapItemStackForLayoutMode;
   static {
-    armorListForLayoutMode.add(new ItemStack(Item.getItemById(276)));
-    armorListForLayoutMode.add(new ItemStack(Item.getItemById(360)));
-    armorListForLayoutMode.add(new ItemStack(Item.getItemById(313)));
-    armorListForLayoutMode.add(new ItemStack(Item.getItemById(312)));
-    armorListForLayoutMode.add(new ItemStack(Item.getItemById(311)));
-    armorListForLayoutMode.add(new ItemStack(Item.getItemById(310)));
+    mapItemStackForLayoutMode = new HashMap<>();
+    mapItemStackForLayoutMode.put(EquipmentSlotType.MAINHAND, new ItemStack(Item.getItemById(276)));
+    mapItemStackForLayoutMode.put(EquipmentSlotType.OFFHAND, new ItemStack(Item.getItemById(360)));
+    mapItemStackForLayoutMode.put(EquipmentSlotType.FEET, new ItemStack(Item.getItemById(313)));
+    mapItemStackForLayoutMode.put(EquipmentSlotType.LEGS, new ItemStack(Item.getItemById(312)));
+    mapItemStackForLayoutMode.put(EquipmentSlotType.CHEST, new ItemStack(Item.getItemById(311)));
+    mapItemStackForLayoutMode.put(EquipmentSlotType.HEAD, new ItemStack(Item.getItemById(310)));
   }
 
-  private List<ItemStack> armorList = Lists.newArrayList();
+  private final ItemStack itemForLayoutMode;
+  private EquipmentSlotType slotType;
+  private ItemStack equipmentItem = null;
 
-  public EquipmentInfo(ModuleManager manager) {
+  private int cacheId = 0;
+
+  public EquipmentInfo(ModuleManager manager, EquipmentSlotType slotType) {
     super("hmage.module.equipment-info", manager);
+    this.slotType = slotType;
+    this.itemForLayoutMode = mapItemStackForLayoutMode.get(slotType);
+  }
+
+  @Override
+  public void computeSize() {
+    if (computedSize == null) {
+      computedSize = new Dimension(0, 0);
+    }
+
+    if (cacheId == equipmentItem.hashCode()) { return; }
+
+
+    if (equipmentItem == null) {
+      computedSize.setSize(0, 0);
+      cacheId = 0;
+      return;
+    }
+
+    if (equipmentItem.isEmpty()) {
+      computedSize.setSize(0, 0);
+      cacheId = equipmentItem.hashCode();
+      return;
+    }
+
+    Minecraft mc = Minecraft.getInstance();
+    String itemText = getTextForItemStack(equipmentItem);
+
+    int width = 20 + mc.fontRenderer.getStringWidth(itemText);
+    int height = 20;
+
+    computedSize.setSize(width, height);
+    cacheId = equipmentItem.hashCode();
   }
 
   @Override
@@ -42,58 +78,39 @@ public class EquipmentInfo extends DrawableModule {
     PlayerEntity player = mc.player;
     FontRenderer fontRenderer = mc.fontRenderer;
 
-    armorList.clear();
-    if (layoutMode) {
-      armorList.addAll(armorListForLayoutMode);
-    } else {
-      //手持ちのアイテム
-      armorList.add(player.getHeldItem(Hand.OFF_HAND));
-      armorList.add(player.getHeldItem(Hand.MAIN_HAND));
-      //装備
-      Iterator<ItemStack> iterator = player.getArmorInventoryList().iterator();
-      while (iterator.hasNext()) {
-        armorList.add(iterator.next());
-      }
-    }
+    this.syncEquipmentSlotItemStack(player);
 
-    Collections.reverse(armorList);
-    Layout layout = getLayout();
+    ItemStack itemStackForRender = layoutMode ? this.itemForLayoutMode : this.equipmentItem;
 
-    int x = 0;
-    int y = 0;
+    this.computePosition(mc);
+    this.computeSize();
+
+    if (Item.getIdFromItem(itemStackForRender.getItem()) == 0)
+      return;
 
     RenderSystem.pushMatrix();
-    RenderSystem.translatef(this.computeX(mc), this.computeY(mc), 0);
+    RenderSystem.translatef(computedPoint.x, computedPoint.y, 0);
     RenderSystem.scalef(this.scale, this.scale, 1.0F);
 
-    for (ItemStack armor : armorList) {
+    int color = this.getDurabilityColor(itemStackForRender);
+    String text = this.getTextForItemStack(itemStackForRender);
+    int stringWidth = fontRenderer.getStringWidth(text);
 
-      if (Item.getIdFromItem(armor.getItem()) == 0)
-        continue;
-
-      int color = getDurabilityColor(armor);
-      String text = getTextForItemStack(armor);
-      int stringWidth = fontRenderer.getStringWidth(text);
-
-      if (layout.isRight() && !layout.isHorizontal()) {
-        drawLightedItem(mc, armor, x + stringWidth + 2, y + 2);
-        fontRenderer.drawStringWithShadow(text, x, y + 10 - mc.fontRenderer.FONT_HEIGHT / 2, color);
-      } else {
-        drawLightedItem(mc, armor, x + 2, y + 2);
-        fontRenderer.drawStringWithShadow(text, x + 20, y + 10 - mc.fontRenderer.FONT_HEIGHT / 2, color);
-      }
-
-      if (layout.isHorizontal()) {
-        x += 20 + stringWidth;
-      } else {
-        y += 20;
-      }
-
+    if (layout.isRight() && !layout.isHorizontal()) {
+      drawLightedItem(mc, itemStackForRender, stringWidth + 2, 2);
+      fontRenderer.drawStringWithShadow(text, 0, 10 - mc.fontRenderer.FONT_HEIGHT / 2, color);
+    } else {
+      drawLightedItem(mc, itemStackForRender, 2, 2);
+      fontRenderer.drawStringWithShadow(text, 20, 10 - mc.fontRenderer.FONT_HEIGHT / 2, color);
     }
 
     RenderSystem.popMatrix();
     RenderSystem.disableRescaleNormal();
     RenderSystem.disableBlend();
+  }
+
+  private void syncEquipmentSlotItemStack(PlayerEntity player) {
+    this.equipmentItem = player.getItemStackFromSlot(this.slotType);
   }
 
   private void drawLightedItem(Minecraft mc, ItemStack stack, int x, int y) {
@@ -139,16 +156,6 @@ public class EquipmentInfo extends DrawableModule {
   @Override
   public int getDefaultY() {
     return 2;
-  }
-
-  @Override
-  public int computeWidth() {
-    return 0;
-  }
-
-  @Override
-  public int computeHeight() {
-    return 0;
   }
 
 }

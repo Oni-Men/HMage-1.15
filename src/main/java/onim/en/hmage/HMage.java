@@ -34,7 +34,7 @@ import onim.en.hmage.gui.screen.AnniServersScreen;
 import onim.en.hmage.gui.screen.HMageSettingScreen;
 import onim.en.hmage.module.IDrawable;
 import onim.en.hmage.module.ModuleManager;
-import onim.en.hmage.module.drawable.EquipmentInfo;
+import onim.en.hmage.module.drawable.EquipmentInfoGroup;
 import onim.en.hmage.module.drawable.StatusEffect;
 import onim.en.hmage.module.drawable.label.CpsCounter;
 import onim.en.hmage.module.normal.CustomGuiBackground;
@@ -91,7 +91,8 @@ public class HMage {
     this.moduleManager.register(new RecipeBookRemover(this.moduleManager));
 
     this.moduleManager.register(new StatusEffect(this.moduleManager));
-    this.moduleManager.register(new EquipmentInfo(this.moduleManager));
+
+    this.moduleManager.register(new EquipmentInfoGroup(this.moduleManager));
 
     this.moduleManager.register(new CpsCounter(this.moduleManager));
 
